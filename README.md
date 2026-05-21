@@ -1,36 +1,98 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Raw Smith — Verification System
 
-## Getting Started
+One-time loyalty migration: 4-digit redemption codes, bilingual emails, staff redemption dashboard with full audit log.
 
-First, run the development server:
+## Stack
+
+- Next.js 16 (App Router) + React 19
+- Supabase (Postgres) — the only data store
+- Resend — email delivery
+- Vercel — hosting
+- shadcn/ui + Tailwind v4
+
+## Local dev
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env.local      # then fill in real values
+pnpm dev                        # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database setup (run once)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+In Supabase → SQL Editor, paste and run `supabase/schema.sql`. Creates:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `customers` — the 150-ish migration customers
+- `staff` — Obaida / Muneeb / Samahar / Ahmed with starter PINs (rotate immediately)
+- `audit_log` — append-only log of every login, redemption, undo, lookup
 
-## Learn More
+## Load customers from CSV
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+pnpm load customers.csv         # parses, validates, mints 4-digit codes, inserts
+pnpm status                     # totals + per-tier breakdown
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Send the bulk email
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+pnpm send --dry-run             # writes HTML to dry-run/, no Resend calls
+pnpm send                       # prompts "type SEND", then 500ms between sends
+pnpm send --tier gold           # filter
+pnpm send --only abc@x.com      # send to one
+pnpm send --retry-failed        # reset failed → pending and retry
+```
 
-## Deploy on Vercel
+`rawsmith.com` must be verified on Resend before live sends. The script hard-aborts
+on the first 403 so you don't burn 150 attempts.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Staff redemption (web app)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/staff` — barista picks their name, enters 4-digit PIN, types customer's 4-digit code → REDEEM
+- `/admin` — stats, per-tier breakdown, per-barista today, audit log
+- `/c/<code>` — public claim page linked from the email
+
+Every action lands in `audit_log` with actor, code, customer, metadata, IP.
+
+## CLI redemption (fallback if web is down)
+
+```bash
+pnpm redeem 4291                # mark redeemed (actor recorded as 'cli')
+pnpm redeem 4291 --check        # show status, no change
+pnpm redeem 4291 --undo         # un-redeem
+```
+
+## Skip / un-skip rows
+
+```bash
+pnpm skip abc@x.com def@y.com
+pnpm skip abc@x.com --undo
+```
+
+## Email preview
+
+```bash
+pnpm preview-email              # 5 samples → email-preview/
+pnpm test-send                  # one real send via Resend
+```
+
+## Deploying to Vercel
+
+1. Push this repo to GitHub.
+2. In Vercel → New Project → import the repo.
+3. Add Environment Variables:
+   - `SUPABASE_URL`
+   - `SUPABASE_SERVICE_ROLE_KEY` ← server-only, no `NEXT_PUBLIC_` prefix
+   - `SESSION_SECRET` (32+ random chars; `openssl rand -base64 32`)
+   - `RESEND_API_KEY`
+   - `FROM_EMAIL`
+   - `REPLY_TO`
+   - `NEXT_PUBLIC_SITE_URL` (set to the production URL after first deploy)
+4. Deploy.
+5. Optional custom domain: add `claim.rawsmith.com` in Vercel → Settings → Domains.
+
+## Rotating PINs
+
+```sql
+update public.staff set pin = '9999' where name = 'Obaida';
+```

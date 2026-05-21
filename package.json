@@ -6,21 +6,42 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "preview-email": "tsx scripts/preview-email.ts",
+    "test-send": "tsx --env-file=.env.local scripts/test-send.ts",
+    "load": "tsx --env-file=.env.local scripts/load.ts",
+    "send": "tsx --env-file=.env.local scripts/send.ts",
+    "status": "tsx --env-file=.env.local scripts/status.ts",
+    "redeem": "tsx --env-file=.env.local scripts/redeem.ts",
+    "skip": "tsx --env-file=.env.local scripts/skip.ts"
   },
   "dependencies": {
+    "@base-ui/react": "^1.5.0",
+    "@supabase/supabase-js": "^2.106.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.471.0",
     "next": "16.2.6",
+    "next-themes": "^0.4.6",
+    "papaparse": "^5.5.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "resend": "^4.8.0",
+    "shadcn": "^4.8.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.6.0",
+    "tw-animate-css": "^1.4.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/papaparse": "^5.3.15",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
+    "tsx": "^4.20.0",
     "typescript": "^5"
   }
 }

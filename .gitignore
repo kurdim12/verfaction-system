@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# raw smith migration
+/email-preview/
+/dry-run/
+/customers.csv
+/sample-customers.csv
+/migration.db
+/migration.db-*
+
+# Allow committing the env *example* but never the real env file
+!.env.example
