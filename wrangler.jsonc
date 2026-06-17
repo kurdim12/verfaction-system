@@ -1,0 +1,16 @@
+{
+  // Cloudflare Worker configuration.
+  // The deployable bundle (.open-next/) is produced by
+  // `opennextjs-cloudflare build`, which `pnpm run build` runs.
+  //
+  // "name" must match the Worker that Cloudflare Workers Builds deploys to.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "verfaction-system",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}
