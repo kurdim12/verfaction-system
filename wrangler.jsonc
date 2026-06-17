@@ -1,0 +1,18 @@
+{
+  // Cloudflare Worker configuration.
+  // The deployable bundle (.open-next/) is produced by
+  // `opennextjs-cloudflare build`, which `pnpm run build` runs.
+  //
+  // NOTE: "name" must match the Worker your Cloudflare Workers Builds
+  // project deploys to. If your Worker is named differently, change it
+  // here, otherwise a new Worker will be created on first deploy.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "raw-smith-migration",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2025-03-25",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}
