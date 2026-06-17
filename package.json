@@ -45,5 +45,11 @@
     "tailwindcss": "^4",
     "tsx": "^4.20.0",
     "typescript": "^5"
+  },
+  "pnpm": {
+    "ignoredBuiltDependencies": [
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
